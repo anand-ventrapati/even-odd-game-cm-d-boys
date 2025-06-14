@@ -8,32 +8,45 @@ import { GameState, Bet } from '@/types/game';
 
 interface GameBoardProps {
   gameState: GameState;
-  onUpdateGame: (newState: Partial<GameState>) => void;
+  onUpdateGame: (newState: Partial<GameState>, playerId?: string) => void;
+  localPlayerId: string | null;
 }
 
-const GameBoard = ({ gameState, onUpdateGame }: GameBoardProps) => {
+const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) => {
   const [betNumber, setBetNumber] = useState(0);
   const [betAmount, setBetAmount] = useState(1);
-  const [guess, setGuess] = useState<'even' | 'odd' | null>(null);
+  // not managing guess state here; handled via game state
 
+  if (!localPlayerId) {
+    return (
+      <div className="flex justify-center items-center h-screen text-white">
+        Select a player using the 'Player 1 View' or 'Player 2 View' buttons above.
+      </div>
+    );
+  }
+
+  const myIndex = gameState.players.findIndex(p => p.id === localPlayerId);
+  const otherIndex = 1 - myIndex;
   const currentPlayer = gameState.players[gameState.currentTurn];
   const otherPlayer = gameState.players[1 - gameState.currentTurn];
+  const isMyTurn = currentPlayer.id === localPlayerId;
+
+  // betting phase: show bet UI to current player, block for other
+  // guessing phase: show guess UI to opponent, block for current
 
   const placeBet = () => {
     if (betAmount > currentPlayer.points || betAmount < 1) return;
-
-    const bet: Bet = {
-      playerId: currentPlayer.id,
-      number: betNumber,
-      amount: betAmount
-    };
-
-    const newLog = [...gameState.gameLog, `${currentPlayer.name} bet ${betAmount} points on number ${betNumber}`];
-
     onUpdateGame({
-      currentBet: bet,
+      currentBet: {
+        playerId: currentPlayer.id,
+        number: betNumber,
+        amount: betAmount,
+      },
       gamePhase: 'guessing',
-      gameLog: newLog
+      gameLog: [
+        ...gameState.gameLog,
+        `${currentPlayer.name} placed a bet.`,
+      ]
     });
   };
 
@@ -42,18 +55,15 @@ const GameBoard = ({ gameState, onUpdateGame }: GameBoardProps) => {
 
     const isEven = gameState.currentBet.number % 2 === 0;
     const isCorrect = (isEven && guessValue === 'even') || (!isEven && guessValue === 'odd');
-    
     const newPlayers = [...gameState.players];
     const betAmount = gameState.currentBet.amount;
-
     if (isCorrect) {
-      newPlayers[1 - gameState.currentTurn].points += betAmount;
-      newPlayers[gameState.currentTurn].points -= betAmount;
+      newPlayers[otherIndex].points += betAmount;
+      newPlayers[myIndex].points -= betAmount;
     } else {
-      newPlayers[gameState.currentTurn].points += betAmount;
-      newPlayers[1 - gameState.currentTurn].points -= betAmount;
+      newPlayers[myIndex].points += betAmount;
+      newPlayers[otherIndex].points -= betAmount;
     }
-
     const resultText = isCorrect ? 'correct' : 'wrong';
     const numberType = isEven ? 'even' : 'odd';
     const newLog = [
@@ -62,11 +72,13 @@ const GameBoard = ({ gameState, onUpdateGame }: GameBoardProps) => {
     ];
 
     // Check for winner
-    const winner = newPlayers.find(p => p.points <= 0) ? newPlayers.find(p => p.points > 0) : null;
+    const winner = newPlayers.find(p => p.points <= 0 || p.points >= 20)
+      ? newPlayers.find(p => p.points >= 20) || newPlayers.find(p => p.points > 0)
+      : null;
 
     onUpdateGame({
       players: newPlayers,
-      currentTurn: winner ? gameState.currentTurn : 1 - gameState.currentTurn,
+      currentTurn: winner ? gameState.currentTurn : otherIndex,
       gamePhase: winner ? 'ended' : 'betting',
       currentBet: null,
       gameLog: newLog,
@@ -138,78 +150,93 @@ const GameBoard = ({ gameState, onUpdateGame }: GameBoardProps) => {
                 <Coins className="h-4 w-4 mr-1" />
                 {player.points}
               </div>
+              {index === myIndex && <div className="text-xs text-blue-300">(You)</div>}
             </div>
           ))}
         </div>
       </div>
 
-      {/* Current Turn */}
       <Card className="bg-white/10 backdrop-blur-sm border-white/20">
         <CardHeader>
           <CardTitle className="text-white text-center">
-            {gameState.gamePhase === 'betting' ? `${currentPlayer.name}'s Turn - Place Bet` : `${otherPlayer.name}'s Turn - Make Guess`}
+            {gameState.gamePhase === 'betting'
+              ? `${currentPlayer.name}'s Turn - Place Bet`
+              : `${otherPlayer.name}'s Turn - Make Guess`}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {gameState.gamePhase === 'betting' ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-white mb-2">Choose Number (0-9)</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                    <Button
-                      key={num}
-                      onClick={() => setBetNumber(num)}
-                      variant={betNumber === num ? "default" : "outline"}
-                      className="aspect-square"
-                    >
-                      {num}
-                    </Button>
-                  ))}
+            isMyTurn ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-white mb-2">Choose Number (0-9)</label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                      <Button
+                        key={num}
+                        onClick={() => setBetNumber(num)}
+                        variant={betNumber === num ? "default" : "outline"}
+                        className="aspect-square"
+                      >
+                        {num}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-white mb-2">Bet Amount (Max: {currentPlayer.points})</label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max={currentPlayer.points}
+                    value={betAmount}
+                    onChange={(e) => setBetAmount(Number(e.target.value))}
+                    className="bg-white/20 border-white/30 text-white"
+                  />
+                </div>
+                <Button
+                  onClick={placeBet}
+                  disabled={betAmount > currentPlayer.points || betAmount < 1}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Place Bet
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center text-white text-lg py-8">
+                Waiting for {currentPlayer.name} to place a bet...
+              </div>
+            )
+          ) : (
+            // Guessing phase
+            !isMyTurn ? (
+              <div className="space-y-4">
+                <div className="text-center text-white">
+                  <p className="mb-4">
+                    {currentPlayer.name} placed a bet.
+                  </p>
+                  <p className="text-lg font-semibold">Guess: Is the number even or odd?</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    onClick={() => makeGuess('even')}
+                    className="bg-green-600 hover:bg-green-700 py-8 text-lg"
+                  >
+                    EVEN
+                  </Button>
+                  <Button
+                    onClick={() => makeGuess('odd')}
+                    className="bg-red-600 hover:bg-red-700 py-8 text-lg"
+                  >
+                    ODD
+                  </Button>
                 </div>
               </div>
-              <div>
-                <label className="block text-white mb-2">Bet Amount (Max: {currentPlayer.points})</label>
-                <Input
-                  type="number"
-                  min="1"
-                  max={currentPlayer.points}
-                  value={betAmount}
-                  onChange={(e) => setBetAmount(Number(e.target.value))}
-                  className="bg-white/20 border-white/30 text-white"
-                />
+            ) : (
+              <div className="text-center text-white text-lg py-8">
+                Waiting for {otherPlayer.name} to guess...
               </div>
-              <Button 
-                onClick={placeBet}
-                disabled={betAmount > currentPlayer.points || betAmount < 1}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-              >
-                Place Bet
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="text-center text-white">
-                <p className="mb-4">
-                  {currentPlayer.name} bet {gameState.currentBet?.amount} points on number {gameState.currentBet?.number}
-                </p>
-                <p className="text-lg font-semibold">Is {gameState.currentBet?.number} even or odd?</p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Button 
-                  onClick={() => makeGuess('even')}
-                  className="bg-green-600 hover:bg-green-700 py-8 text-lg"
-                >
-                  EVEN
-                </Button>
-                <Button 
-                  onClick={() => makeGuess('odd')}
-                  className="bg-red-600 hover:bg-red-700 py-8 text-lg"
-                >
-                  ODD
-                </Button>
-              </div>
-            </div>
+            )
           )}
         </CardContent>
       </Card>
