@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dice1, Users } from 'lucide-react';
 import { GameState } from '@/types/game';
+import InviteLink from './InviteLink';
 
 interface GameLobbyProps {
   onGameStart: (gameState: Partial<GameState>) => void;
@@ -15,6 +15,7 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
   const [playerName, setPlayerName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [createdGamePin, setCreatedGamePin] = useState<string | null>(null);
 
   const generatePin = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
@@ -29,7 +30,8 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
     };
 
     setIsCreating(true);
-    
+    setCreatedGamePin(pin); // set PIN to display invite UI
+
     // Simulate waiting for second player
     setTimeout(() => {
       const player2 = {
@@ -76,6 +78,11 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
     }, 1000);
   };
 
+  // Invite link construction
+  const inviteLink = createdGamePin
+    ? `${window.location.origin}/?pin=${createdGamePin}`
+    : "";
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -97,6 +104,7 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+              disabled={isCreating}
             />
             
             <div className="space-y-3">
@@ -107,17 +115,20 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
               >
                 {isCreating ? 'Creating Game...' : 'Create New Game'}
               </Button>
-              
+              {createdGamePin && (
+                <InviteLink link={inviteLink} />
+              )}
               <div className="flex space-x-2">
                 <Input
                   placeholder="Game PIN"
                   value={gamePin}
                   onChange={(e) => setGamePin(e.target.value)}
                   className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                  disabled={isCreating}
                 />
                 <Button 
                   onClick={joinGame}
-                  disabled={!playerName.trim() || !gamePin.trim() || isJoining}
+                  disabled={!playerName.trim() || !gamePin.trim() || isJoining || isCreating}
                   className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
                 >
                   {isJoining ? 'Joining...' : 'Join'}
