@@ -21,10 +21,11 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
   const [createdGamePin, setCreatedGamePin] = useState<string | null>(null);
 
   // Generate PIN and handle create/join, as before
-  const generatePin = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+  const generatePin = () =>
+    Math.random().toString(36).substring(2, 8).toUpperCase();
 
   const createGame = () => {
-    if (!playerName.trim() || playerMode !== "player1") return;
+    if (!playerName.trim() || playerMode !== 'player1') return;
     const pin = generatePin();
     const player = {
       id: '1',
@@ -40,53 +41,71 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
       const player2 = {
         id: '2',
         name: 'Player 2',
-        points: 10
+        points: 10,
       };
-      onGameStart({
-        gameId: pin,
-        players: [player, player2],
-        currentTurn: 0,
-        gamePhase: 'betting',
-        gameLog: [`Game ${pin} started!`, `${player.name} joined`, `${player2.name} joined`],
-        currentBet: null,
-        winner: null
-      }, '1');
+      onGameStart(
+        {
+          gameId: pin,
+          players: [player, player2],
+          currentTurn: 0,
+          gamePhase: 'betting',
+          gameLog: [
+            `Game ${pin} started!`,
+            `${player.name} joined`,
+            `${player2.name} joined`,
+          ],
+          currentBet: null,
+          winner: null,
+        },
+        '1'
+      );
     }, 2000);
   };
 
   const joinGame = () => {
-    if (!playerName.trim() || !gamePin.trim() || playerMode !== "player2") return;
+    if (
+      !playerName.trim() ||
+      !gamePin.trim() ||
+      playerMode !== 'player2'
+    )
+      return;
 
     const player = {
       id: '2',
       name: playerName.trim(),
-      points: 10
+      points: 10,
     };
     const player1 = {
       id: '1',
       name: 'Player 1',
-      points: 10
+      points: 10,
     };
     setIsJoining(true);
 
     setTimeout(() => {
-      onGameStart({
-        gameId: gamePin.toUpperCase(),
-        players: [player1, player],
-        currentTurn: 0,
-        gamePhase: 'betting',
-        gameLog: [`Game ${gamePin.toUpperCase()} started!`, `${player1.name} joined`, `${player.name} joined`],
-        currentBet: null,
-        winner: null
-      }, '2');
+      onGameStart(
+        {
+          gameId: gamePin.toUpperCase(),
+          players: [player1, player],
+          currentTurn: 0,
+          gamePhase: 'betting',
+          gameLog: [
+            `Game ${gamePin.toUpperCase()} started!`,
+            `${player1.name} joined`,
+            `${player.name} joined`,
+          ],
+          currentBet: null,
+          winner: null,
+        },
+        '2'
+      );
     }, 1000);
   };
 
   const inviteLink = createdGamePin
     ? `${window.location.origin}/?pin=${createdGamePin}`
-    : "";
+    : '';
 
-  // UI: show only appropriate actions for given player simulation mode
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
@@ -100,47 +119,75 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 
         <Card className="bg-white/10 backdrop-blur-sm border-white/20">
           <CardHeader>
-            <CardTitle className="text-white text-center">Join Game</CardTitle>
+            <CardTitle className="text-white text-center">Game Lobby</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Input
-              placeholder="Your name"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
-              disabled={isCreating}
-            />
-
-            <div className="space-y-3">
-              {/* Only Player 1 can create a new game */}
-              <Button
-                onClick={createGame}
-                disabled={!playerName.trim() || isCreating || playerMode !== "player1"}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-              >
-                {isCreating ? 'Creating Game...' : 'Create New Game'}
-              </Button>
-              {createdGamePin && (
-                <InviteLink link={inviteLink} />
-              )}
-              <div className="flex space-x-2">
-                {/* Only Player 2 can join using PIN */}
-                <Input
-                  placeholder="Game PIN"
-                  value={gamePin}
-                  onChange={(e) => setGamePin(e.target.value)}
-                  className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
-                  disabled={isCreating}
-                />
-                <Button
-                  onClick={joinGame}
-                  disabled={!playerName.trim() || !gamePin.trim() || isJoining || isCreating || playerMode !== "player2"}
-                  className="bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
-                >
-                  {isJoining ? 'Joining...' : 'Join'}
-                </Button>
-              </div>
+            {/* Section 1: Enter Your Name */}
+            <div className="space-y-2">
+              <label className="block text-white text-sm">
+                Enter Your Name
+              </label>
+              <Input
+                placeholder="Your name"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                disabled={isCreating || isJoining}
+              />
             </div>
+
+            {/* Section 2: Create or Join Game */}
+            <div className="my-4 border-b border-white/20"></div>
+            {/* Only Player 1 can create a new game */}
+            {playerMode === 'player1' && (
+              <div className="space-y-2">
+                <Button
+                  onClick={createGame}
+                  disabled={!playerName.trim() || isCreating}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {isCreating ? 'Creating Game...' : 'Create New Game'}
+                </Button>
+                {/* Show PIN as text after creation */}
+                {createdGamePin && (
+                  <div>
+                    <div className="text-center my-4">
+                      <div className="font-mono text-lg text-yellow-300 font-bold tracking-widest bg-black/40 rounded p-2 inline-block">
+                        Game PIN: {createdGamePin}
+                      </div>
+                    </div>
+                    <InviteLink link={inviteLink} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Only Player 2 can join using PIN */}
+            {playerMode === 'player2' && (
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-white text-sm">
+                    Enter Game PIN
+                  </label>
+                  <Input
+                    placeholder="Game PIN"
+                    value={gamePin}
+                    onChange={(e) => setGamePin(e.target.value)}
+                    className="bg-white/20 border-white/30 text-white placeholder:text-white/60 mb-2"
+                    disabled={isJoining}
+                  />
+                  <Button
+                    onClick={joinGame}
+                    disabled={
+                      !playerName.trim() || !gamePin.trim() || isJoining
+                    }
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap"
+                  >
+                    {isJoining ? 'Joining...' : 'Join'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
