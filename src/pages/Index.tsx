@@ -1,12 +1,9 @@
-
 import { useState } from 'react';
 import GameLobby from '@/components/GameLobby';
 import GameBoard from '@/components/GameBoard';
 import { GameState } from '@/types/game';
-import { usePlayerMode } from '@/components/PlayerModeContext';
 
 const Index = () => {
-  const { playerMode } = usePlayerMode();
   const [gameState, setGameState] = useState<GameState>({
     gameId: '',
     players: [],
@@ -16,6 +13,7 @@ const Index = () => {
     gameLog: [],
     winner: null
   });
+  // Keep playerId in local state, managed by GameLobby
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
 
   const updateGameState = (newState: Partial<GameState>, playerId?: string) => {
@@ -28,11 +26,10 @@ const Index = () => {
       {gameState.gamePhase === 'lobby' ? (
         <GameLobby onGameStart={updateGameState} />
       ) : (
-        // Pass which "simulated player" you currently are
         <GameBoard
           gameState={gameState}
           onUpdateGame={updateGameState}
-          localPlayerId={playerMode === "player1" ? "1" : playerMode === "player2" ? "2" : null}
+          localPlayerId={localPlayerId}
         />
       )}
     </div>
