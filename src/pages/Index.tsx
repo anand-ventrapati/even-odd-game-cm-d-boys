@@ -1,12 +1,31 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from 'react';
+import GameLobby from '@/components/GameLobby';
+import GameBoard from '@/components/GameBoard';
+import { GameState, Player } from '@/types/game';
 
 const Index = () => {
+  const [gameState, setGameState] = useState<GameState>({
+    gameId: '',
+    players: [],
+    currentTurn: 0,
+    gamePhase: 'lobby',
+    currentBet: null,
+    gameLog: [],
+    winner: null
+  });
+
+  const updateGameState = (newState: Partial<GameState>) => {
+    setGameState(prev => ({ ...prev, ...newState }));
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+      {gameState.gamePhase === 'lobby' ? (
+        <GameLobby onGameStart={updateGameState} />
+      ) : (
+        <GameBoard gameState={gameState} onUpdateGame={updateGameState} />
+      )}
     </div>
   );
 };
