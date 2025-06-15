@@ -1,11 +1,12 @@
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dice1, Users } from 'lucide-react';
 import { GameState } from '@/types/game';
 import InviteLink from './InviteLink';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GameLobbyProps {
   onGameStart: (gameState: Partial<GameState>, localPlayerId: string) => void;
@@ -16,89 +17,154 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
   const [createPlayerName, setCreatePlayerName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createdGamePin, setCreatedGamePin] = useState<string | null>(null);
+  const [waitingForPlayer2, setWaitingForPlayer2] = useState(false);
 
   // JOIN GAME
   const [joinPlayerName, setJoinPlayerName] = useState('');
   const [joinGamePin, setJoinGamePin] = useState('');
   const [isJoining, setIsJoining] = useState(false);
 
-  // Generate PIN and handle create/join, as before
-  const generatePin = () =>
-    Math.random().toString(36).substring(2, 8).toUpperCase();
+  // For polling
+  const pollingIntervalRef = useRef<NodeJS.Timeout>();
 
-  const createGame = () => {
+  // SUPABASE LOGIC
+  const generatePin = () =>
+    Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit number as PIN
+
+  const createGame = async () => {
     if (!createPlayerName.trim()) return;
     const pin = generatePin();
-    const player = {
-      id: '1',
-      name: createPlayerName.trim(),
-      points: 10,
-    };
-
     setIsCreating(true);
-    setCreatedGamePin(pin);
 
-    // Wait for second player to join (simulate, just for demo)
-    setTimeout(() => {
-      // "player 2" placeholder only — will be replaced when they join
-      const player2 = {
-        id: '2',
-        name: 'Player 2',
-        points: 10,
-      };
-      onGameStart(
+    // Create game in Supabase with only player1
+    const { data, error } = await supabase
+      .from('games')
+      .insert([
         {
-          gameId: pin,
-          players: [player, player2],
-          currentTurn: 0,
-          gamePhase: 'betting',
-          gameLog: [
-            `Game ${pin} started!`,
-            `${player.name} joined`,
-            `${player2.name} joined`,
-          ],
-          currentBet: null,
-          winner: null,
+          pin,
+          ['player 1']: createPlayerName.trim(),
+          ['player 2']: null,
+          turn: null,
+          gameState: null,
         },
-        '1'
-      );
+      ])
+      .select()
+      .single();
+
+    if (error) {
+      setIsCreating(false);
+      alert('Error creating game: ' + error.message);
+      return;
+    }
+
+    setCreatedGamePin(pin);
+    setIsCreating(false);
+    setWaitingForPlayer2(true);
+
+    // Start polling for player 2 to join
+    pollingIntervalRef.current = setInterval(async () => {
+      const { data: pollGame, error: pollError } = await supabase
+        .from('games')
+        .select('*')
+        .eq('pin', pin)
+        .single();
+
+      if (!pollError && pollGame && pollGame['player 2']) {
+        // Player2 joined
+        clearInterval(pollingIntervalRef.current!);
+        setWaitingForPlayer2(false);
+
+        // Move to game phase
+        onGameStart(
+          {
+            gameId: pin,
+            players: [
+              { id: '1', name: createPlayerName.trim(), points: 10 },
+              { id: '2', name: pollGame['player 2'], points: 10 },
+            ],
+            currentTurn: 0,
+            gamePhase: 'betting',
+            gameLog: [
+              `Game ${pin} started!`,
+              `${createPlayerName.trim()} joined`,
+              `${pollGame['player 2']} joined`,
+            ],
+            currentBet: null,
+            winner: null,
+          },
+          '1'
+        );
+      }
     }, 2000);
   };
 
-  const joinGame = () => {
+  // JOIN GAME logic
+  const joinGame = async () => {
     if (!joinPlayerName.trim() || !joinGamePin.trim()) return;
-
-    const player1 = {
-      id: '1',
-      name: 'Player 1',
-      points: 10,
-    };
-    const player2 = {
-      id: '2',
-      name: joinPlayerName.trim(),
-      points: 10,
-    };
     setIsJoining(true);
 
-    setTimeout(() => {
-      onGameStart(
-        {
-          gameId: joinGamePin.toUpperCase(),
-          players: [player1, player2],
-          currentTurn: 0,
-          gamePhase: 'betting',
-          gameLog: [
-            `Game ${joinGamePin.toUpperCase()} started!`,
-            `${player1.name} joined`,
-            `${player2.name} joined`,
-          ],
-          currentBet: null,
-          winner: null,
-        },
-        '2'
-      );
-    }, 1000);
+    // Try to update the game and fill in player2
+    const { data: existingGame, error: fetchError } = await supabase
+      .from('games')
+      .select('*')
+      .eq('pin', joinGamePin.trim())
+      .single();
+
+    if (fetchError || !existingGame) {
+      setIsJoining(false);
+      alert('Invalid PIN or game not found.');
+      return;
+    }
+    if (existingGame['player 2']) {
+      setIsJoining(false);
+      alert('Game already has two players.');
+      return;
+    }
+
+    // Update player2
+    const { data: updatedGame, error: updateError } = await supabase
+      .from('games')
+      .update({ ['player 2']: joinPlayerName.trim() })
+      .eq('pin', joinGamePin.trim())
+      .select()
+      .single();
+
+    if (updateError || !updatedGame) {
+      setIsJoining(false);
+      alert('Failed to join game.');
+      return;
+    }
+
+    setIsJoining(false);
+
+    // Notify both clients that game is ready
+    onGameStart(
+      {
+        gameId: joinGamePin.trim(),
+        players: [
+          { id: '1', name: updatedGame['player 1'], points: 10 },
+          { id: '2', name: joinPlayerName.trim(), points: 10 },
+        ],
+        currentTurn: 0,
+        gamePhase: 'betting',
+        gameLog: [
+          `Game ${joinGamePin.trim()} started!`,
+          `${updatedGame['player 1']} joined`,
+          `${joinPlayerName.trim()} joined`,
+        ],
+        currentBet: null,
+        winner: null,
+      },
+      '2'
+    );
   };
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+    };
+  }, []);
 
   const inviteLink = createdGamePin
     ? `${window.location.origin}/?pin=${createdGamePin}`
@@ -131,17 +197,17 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
                   value={createPlayerName}
                   onChange={(e) => setCreatePlayerName(e.target.value)}
                   className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
-                  disabled={isCreating}
+                  disabled={isCreating || waitingForPlayer2}
                 />
               </div>
               <Button
                 onClick={createGame}
-                disabled={!createPlayerName.trim() || isCreating}
+                disabled={!createPlayerName.trim() || isCreating || waitingForPlayer2}
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
               >
                 {isCreating ? 'Creating Game...' : 'Create New Game'}
               </Button>
-              {/* PIN and Invite section */}
+              {/* PIN and Invite section (show while waiting for player 2) */}
               {createdGamePin && (
                 <div className="mt-6">
                   <div className="text-center my-4">
@@ -153,6 +219,12 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
                   <div className="text-white mt-4 text-sm text-center">
                     Share this PIN with your friend to join the game.
                   </div>
+                  {waitingForPlayer2 && (
+                    <div className="text-yellow-200 mt-4 text-center font-bold flex flex-col items-center justify-center gap-2">
+                      <span>Waiting for opponent to join...</span>
+                      <span className="text-xs opacity-80">(Don&apos;t close this screen.)</span>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -213,3 +285,4 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 };
 
 export default GameLobby;
+
