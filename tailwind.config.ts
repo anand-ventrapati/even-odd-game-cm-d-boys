@@ -89,7 +89,27 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+			},
+      fontFamily: {
+        playfair: ['"Playfair Display"', 'serif'],
+      },
+      keyframes: {
+        glitter: {
+          '0%, 100%': {
+            'background-position': '0% 50%',
+            color: '#fff',
+            'text-shadow': '0 1px 10px #fff7, 0 2px 20px #afafff44'
+          },
+          '50%': {
+            'background-position': '100% 50%',
+            color: '#ffe0b2',
+            'text-shadow': '0 1px 20px #fdffae88, 0 2px 30px #ffd6e6'
+          }
+        }
+      },
+      animation: {
+        glitter: 'glitter 2s linear infinite'
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import GameLobby from '@/components/GameLobby';
 import GameBoard from '@/components/GameBoard';
@@ -5,6 +6,9 @@ import { GameState } from '@/types/game';
 import GameHowToPlayModal from '@/components/GameHowToPlayModal';
 import { Button } from '@/components/ui/button';
 import { Info } from 'lucide-react';
+
+// Please add this to your index.html <head> for the font to fully work:
+// <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap">
 
 const Index = () => {
   const [gameState, setGameState] = useState<GameState>({
@@ -16,10 +20,7 @@ const Index = () => {
     gameLog: [],
     winner: null
   });
-  // Keep playerId in local state, managed by GameLobby
   const [localPlayerId, setLocalPlayerId] = useState<string | null>(null);
-
-  // Modal state for how to play (lobby only)
   const [howToOpen, setHowToOpen] = useState(false);
 
   const updateGameState = (newState: Partial<GameState>, playerId?: string) => {
@@ -31,6 +32,20 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col">
       {gameState.gamePhase === 'lobby' ? (
         <>
+          {/* Glitter Slogan Banner */}
+          <div className="w-full flex justify-center items-center p-4 mt-2 select-none">
+            <span
+              className="font-playfair text-2xl md:text-3xl text-center font-bold bg-gradient-to-r from-yellow-400 via-pink-500 to-blue-400 bg-clip-text text-transparent animate-glitter drop-shadow-lg tracking-wide"
+              style={{
+                backgroundSize: "200% 200%",
+                WebkitTextStroke: "1.2px #fff7",
+                filter: "drop-shadow(0 2px 8px #ffe7a2) drop-shadow(0 1px 10px #93d0ff66)",
+                letterSpacing: '0.04em'
+              }}
+            >
+              Bet smart, play fun, and win big — place your bets, test your luck, and let the fun begin!
+            </span>
+          </div>
           {/* Top bar with How to play */}
           <div className="w-full flex justify-end items-start p-4">
             <Button 
