@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import GameLobby from '@/components/GameLobby';
 import GameBoard from '@/components/GameBoard';
@@ -35,11 +34,9 @@ const Index = () => {
           {/* Glitter Slogan Banner */}
           <div className="w-full flex justify-center items-center p-4 mt-2 select-none">
             <span
-              className="font-playfair text-2xl md:text-3xl text-center font-bold bg-gradient-to-r from-yellow-400 via-pink-500 to-blue-400 bg-clip-text text-transparent animate-glitter drop-shadow-lg tracking-wide"
+              className="font-playfair text-lg md:text-xl text-center font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-teal-400 bg-clip-text text-transparent animate-glitter tracking-wide"
               style={{
                 backgroundSize: "200% 200%",
-                WebkitTextStroke: "1.2px #fff7",
-                filter: "drop-shadow(0 2px 8px #ffe7a2) drop-shadow(0 1px 10px #93d0ff66)",
                 letterSpacing: '0.04em'
               }}
             >
