@@ -25,7 +25,8 @@ export function useSupabaseGameSync(pin: string | null): UseSupabaseGameSyncRetu
       .maybeSingle()
       .then(({ data, error }) => {
         if (!error && data && data.gameState) {
-          setSyncedState(data.gameState as GameState);
+          // Fix: First cast to unknown, then to GameState
+          setSyncedState(data.gameState as unknown as GameState);
         }
         setIsSyncing(false);
       });
@@ -51,7 +52,7 @@ export function useSupabaseGameSync(pin: string | null): UseSupabaseGameSyncRetu
           filter: `pin=eq.${pin}`,
         },
         (payload) => {
-          const newGameState = payload.new.gameState as GameState | null;
+          const newGameState = payload.new.gameState as unknown as GameState | null;
           if (newGameState) setSyncedState(newGameState);
         }
       )
@@ -76,7 +77,8 @@ export function useSupabaseGameSync(pin: string | null): UseSupabaseGameSyncRetu
       const newGameState = { ...syncedState, ...next };
       await supabase
         .from("games")
-        .update({ gameState: newGameState })
+        // Fix: Cast newGameState as any to satisfy Supabase Json typing
+        .update({ gameState: newGameState as any })
         .eq("pin", pin);
       setIsSyncing(false);
       // Note: The realtime callback will update syncedState, so no need to set it here
