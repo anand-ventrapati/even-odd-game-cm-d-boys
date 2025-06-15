@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import GameLobby from '@/components/GameLobby';
 import GameBoard from '@/components/GameBoard';
@@ -46,20 +45,35 @@ const Index = () => {
           <GameLobby onGameStart={updateGameState} />
           {/* Credits at the bottom of home page */}
           <div className="w-full flex flex-col items-center mt-8 pb-8">
-            <a
-              href="https://instagram.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-base mt-8 px-4 py-2 rounded transition hover:opacity-80 hover:scale-105"
+            <div className="font-semibold text-base mt-8 px-4 py-2 rounded transition hover:opacity-80 hover:scale-105"
               style={{
                 background: "linear-gradient(to right, #00c6ff, #0072ff)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
-                cursor: "pointer"
+                cursor: "default"
               }}
             >
-              Created by Anand and Sohail
-            </a>
+              Created by{' '}
+              <a
+                href="https://instagram.com/anand_ventrapati"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline cursor-pointer"
+                style={{ WebkitTextFillColor: "inherit" }}
+              >
+                Anand
+              </a>
+              {' '}and{' '}
+              <a
+                href="https://instagram.com/_big_fan_of_muhammad_saw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:underline cursor-pointer"
+                style={{ WebkitTextFillColor: "inherit" }}
+              >
+                Sohail
+              </a>
+            </div>
           </div>
         </>
       ) : (
@@ -74,4 +88,3 @@ const Index = () => {
 };
 
 export default Index;
-
