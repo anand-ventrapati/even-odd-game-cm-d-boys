@@ -36,8 +36,6 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
     const pin = generatePin();
     setIsCreating(true);
 
-    console.log("Attempting to create game with pin", pin, "and player 1", createPlayerName.trim());
-
     // Create game in Supabase with only player1
     const { data, error } = await supabase
       .from('games')
@@ -55,12 +53,9 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 
     if (error) {
       setIsCreating(false);
-      console.error('Error creating game:', error.message);
       alert('Error creating game: ' + error.message);
       return;
     }
-
-    console.log("Game created in Supabase:", data);
 
     setCreatedGamePin(pin);
     setIsCreating(false);
@@ -68,22 +63,16 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 
     // Start polling for player 2 to join
     pollingIntervalRef.current = setInterval(async () => {
-      console.log("Polling for player 2 for pin:", pin);
       const { data: pollGame, error: pollError } = await supabase
         .from('games')
         .select('*')
         .eq('pin', pin)
         .single();
 
-      if (pollError) {
-        console.error('Polling error:', pollError);
-      }
-
       if (!pollError && pollGame && pollGame['player 2']) {
+        // Player2 joined
         clearInterval(pollingIntervalRef.current!);
         setWaitingForPlayer2(false);
-
-        console.log("Player 2 joined:", pollGame['player 2']);
 
         // Move to game phase
         onGameStart(
@@ -114,8 +103,6 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
     if (!joinPlayerName.trim() || !joinGamePin.trim()) return;
     setIsJoining(true);
 
-    console.log("Attempting to join game with pin", joinGamePin.trim(), "and player 2", joinPlayerName.trim());
-
     // Try to update the game and fill in player2
     const { data: existingGame, error: fetchError } = await supabase
       .from('games')
@@ -125,13 +112,11 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 
     if (fetchError || !existingGame) {
       setIsJoining(false);
-      console.error('Invalid PIN or game not found:', fetchError);
       alert('Invalid PIN or game not found.');
       return;
     }
     if (existingGame['player 2']) {
       setIsJoining(false);
-      console.warn('Game already has two players.', existingGame);
       alert('Game already has two players.');
       return;
     }
@@ -146,12 +131,9 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 
     if (updateError || !updatedGame) {
       setIsJoining(false);
-      console.error('Failed to join game:', updateError);
       alert('Failed to join game.');
       return;
     }
-
-    console.log("Player 2 joined game:", updatedGame);
 
     setIsJoining(false);
 
@@ -303,3 +285,4 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
 };
 
 export default GameLobby;
+
