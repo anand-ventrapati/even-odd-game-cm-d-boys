@@ -17,7 +17,6 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
   const [betNumber, setBetNumber] = useState(0);
   const [betAmount, setBetAmount] = useState(1);
   const [betError, setBetError] = useState<string | null>(null);
-  const [howToOpen, setHowToOpen] = useState(false);
 
   if (!localPlayerId) {
     return (
@@ -211,18 +210,6 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
 
   return (
     <div className="min-h-screen p-4 space-y-4 flex flex-col justify-between">
-      {/* Top bar with How to play */}
-      <div className="w-full flex justify-end items-start mb-2">
-        <Button 
-          onClick={() => setHowToOpen(true)} 
-          variant="outline"
-          className="flex items-center gap-1 text-white border-white/30 hover:bg-white/10 backdrop-blur-sm"
-        >
-          <Info className="h-4 w-4" />
-          How to play
-        </Button>
-        <GameHowToPlayModal open={howToOpen} onOpenChange={setHowToOpen} />
-      </div>
       <div>
         {/* Header */}
         <div className="text-center">
