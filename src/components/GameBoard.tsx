@@ -56,7 +56,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
         if (!error && data) {
           // Only update if gameState is present in db
           if (data.gameState && JSON.stringify(data.gameState) !== JSON.stringify(gameState)) {
-            onUpdateGame(data.gameState);
+            onUpdateGame(data.gameState as Partial<GameState>);
           }
         }
       }, 2000);
@@ -79,7 +79,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
       // Save latest gameState to Supabase
       supabase
         .from('games')
-        .update({ gameState })
+        .update({ gameState: gameState as any })
         .eq('pin', gameState.gameId)
         .then();
     }
