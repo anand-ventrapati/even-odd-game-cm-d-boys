@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +33,57 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
 
   // Allow betting only up to BOTH players' points
   const maxAllowedBet = Math.min(currentPlayer.points, otherPlayer.points);
+
+  // --- MULTIPLAYER POLLING LOGIC ---
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Start polling when both players present and NOT in lobby
+    if (
+      gameState.gameId &&
+      gameState.players.length === 2 &&
+      gameState.gamePhase !== 'lobby'
+    ) {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+
+      pollingRef.current = setInterval(async () => {
+        const { data, error } = await supabase
+          .from('games')
+          .select('*')
+          .eq('pin', gameState.gameId)
+          .maybeSingle();
+
+        if (!error && data) {
+          // Only update if gameState is present in db
+          if (data.gameState && JSON.stringify(data.gameState) !== JSON.stringify(gameState)) {
+            onUpdateGame(data.gameState);
+          }
+        }
+      }, 2000);
+    }
+
+    return () => {
+      // Clear polling interval when unmounting or returning to lobby
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [gameState.gameId, gameState.players.length, gameState.gamePhase]);
+
+  // --- GAME STATE UPDATE TO DB when local changes ---
+  useEffect(() => {
+    // Only update db if in game (not lobby)
+    if (
+      gameState.gameId &&
+      gameState.players.length === 2 &&
+      gameState.gamePhase !== 'lobby'
+    ) {
+      // Save latest gameState to Supabase
+      supabase
+        .from('games')
+        .update({ gameState })
+        .eq('pin', gameState.gameId)
+        .then();
+    }
+  }, [gameState]); // save whenever gameState changes
 
   // --- PHASE: BETTING ---
   const placeBet = () => {
