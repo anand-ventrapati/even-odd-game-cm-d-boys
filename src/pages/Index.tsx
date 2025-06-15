@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import GameLobby from '@/components/GameLobby';
 import GameBoard from '@/components/GameBoard';
@@ -28,7 +29,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col">
       {gameState.gamePhase === 'lobby' ? (
         <>
           {/* Top bar with How to play */}
@@ -43,6 +44,23 @@ const Index = () => {
             <GameHowToPlayModal open={howToOpen} onOpenChange={setHowToOpen} />
           </div>
           <GameLobby onGameStart={updateGameState} />
+          {/* Credits at the bottom of home page */}
+          <div className="w-full flex flex-col items-center mt-8 pb-8">
+            <a
+              href="https://instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-base mt-8 px-4 py-2 rounded transition hover:opacity-80 hover:scale-105"
+              style={{
+                background: "linear-gradient(to right, #00c6ff, #0072ff)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                cursor: "pointer"
+              }}
+            >
+              Created by Anand and Sohail
+            </a>
+          </div>
         </>
       ) : (
         <GameBoard
@@ -56,3 +74,4 @@ const Index = () => {
 };
 
 export default Index;
+
