@@ -1,5 +1,5 @@
 
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Info } from "lucide-react";
 
@@ -13,23 +13,24 @@ export default function GameHowToPlayModal({ open, onOpenChange }: { open: boole
             How to Play
           </SheetTitle>
         </SheetHeader>
-        <div className="py-4 text-base space-y-4 text-black">
+        {/* Scrollable content area */}
+        <div className="py-4 text-base space-y-4 text-black overflow-y-auto" style={{ maxHeight: "60vh" }}>
           <ol className="list-decimal list-inside space-y-2">
             <li>Both players join a game using the Game PIN and select their player view.</li>
             <li>Each player starts with <span className="font-bold">10 points.</span></li>
             <li>The first player (current turn) secretly chooses a number between 0-9 and places a bet (amount of points).</li>
             <li>The bet amount cannot be higher than either player's current points.</li>
             <li>
-              The other player tries to guess if the chosen number is{' '}
-              <span className="font-semibold text-green-500">even</span> or{' '}
+              The other player tries to guess if the chosen number is{" "}
+              <span className="font-semibold text-green-500">even</span> or{" "}
               <span className="font-semibold text-red-500">odd</span>.
             </li>
             <li>
-              If the guess is{' '}
+              If the guess is{" "}
               <span className="text-green-500 font-semibold">correct</span>, the guesser wins the bet amount from the bettor.
             </li>
             <li>
-              If the guess is{' '}
+              If the guess is{" "}
               <span className="text-red-500 font-semibold">wrong</span>, the bettor wins the bet amount from the guesser.
             </li>
             <li>
