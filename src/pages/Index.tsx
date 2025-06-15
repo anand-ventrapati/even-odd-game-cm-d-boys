@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import GameLobby from '@/components/GameLobby';
 import GameBoard from '@/components/GameBoard';
@@ -36,10 +35,9 @@ const Index = () => {
           <div className="w-full flex justify-end items-start p-4">
             <Button 
               onClick={() => setHowToOpen(true)} 
-              variant="outline"
-              className="flex items-center gap-1 text-white border-white/30 hover:bg-white/10 backdrop-blur-sm"
+              variant="ghost"
+              className="text-black font-semibold bg-transparent border-none shadow-none hover:bg-gray-100 hover:text-black focus:bg-gray-200 focus:text-black"
             >
-              <Info className="h-4 w-4" />
               How to play
             </Button>
             <GameHowToPlayModal open={howToOpen} onOpenChange={setHowToOpen} />
