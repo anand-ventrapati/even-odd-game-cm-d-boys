@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Coins, Trophy, RotateCcw, Info } from 'lucide-react';
 import { GameState, Bet } from '@/types/game';
 import GameHowToPlayModal from './GameHowToPlayModal';
+import { toast } from '@/hooks/use-toast';
 
 interface GameBoardProps {
   gameState: GameState;
@@ -136,6 +137,34 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
     const numberType = isEven ? 'even' : 'odd';
     const afterPoints = `Points: ${newPlayers[0].name}: ${newPlayers[0].points}, ${newPlayers[1].name}: ${newPlayers[1].points}`;
 
+    // Show toast notification with result
+    const guesserName = gameState.players[guesserIdx].name;
+    const bettorName = gameState.players[bettorIdx].name;
+    const currentPlayerName = gameState.players[myIndex].name;
+    const isCurrentPlayerGuesser = guesserIdx === myIndex;
+    
+    let toastMessage = '';
+    if (isCurrentPlayerGuesser) {
+      if (isCorrect) {
+        toastMessage = `You guessed correct 🎉 Earned ${betAmountVal} points 🏆`;
+      } else {
+        toastMessage = `You guessed wrong ❌ Lost ${betAmountVal} points 😢`;
+      }
+    } else {
+      const opponentName = isCurrentPlayerGuesser ? bettorName : guesserName;
+      if (isCorrect) {
+        toastMessage = `${guesserName} guessed correct 🎯 You lost ${betAmountVal} points 😢`;
+      } else {
+        toastMessage = `${guesserName} guessed wrong ❌ You earned ${betAmountVal} points from them 🏆`;
+      }
+    }
+
+    toast({
+      title: "Round Result",
+      description: toastMessage,
+      duration: 3000,
+    });
+
     // Check for winner
     const winner = newPlayers.find(p => p.points <= 0 || p.points >= 20)
       ? newPlayers.find(p => p.points >= 20) || newPlayers.find(p => p.points > 0)
@@ -213,7 +242,6 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
       <div>
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-2">Game PIN: {gameState.gameId}</h1>
           <div className="flex justify-center space-x-8">
             {gameState.players.map((player, index) => (
               <div key={player.id} className={`text-center ${index === gameState.currentTurn ? 'text-yellow-400' : 'text-white'}`}>
@@ -342,28 +370,6 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
           </CardContent>
         </Card>
       </div>
-      {/* Footer Credits */}
-      <footer className="w-full text-center mt-4 pb-2 text-white/70 text-sm">
-        Created by
-        {" "}
-        <a
-          href="https://instagram.com/anand_ventrapati"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-pink-300 transition-colors"
-        >
-          Anand
-        </a>
-        {" and "}
-        <a
-          href="https://instagram.com/_big_fan_of_muhammad_saw"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-pink-300 transition-colors"
-        >
-          Sohail
-        </a>
-      </footer>
     </div>
   );
 };

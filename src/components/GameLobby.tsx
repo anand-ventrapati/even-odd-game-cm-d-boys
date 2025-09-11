@@ -175,10 +175,10 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
       <div className="w-full max-w-2xl space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
-            <Dice1 className="h-12 w-12 text-yellow-400 mr-2" />
-            <h1 className="text-4xl font-bold text-white">Even-Odd</h1>
+            <Dice1 className="h-16 w-16 text-yellow-400 mr-3" />
+            <h1 className="text-5xl font-bold text-white">Even-Odd</h1>
           </div>
-          <p className="text-blue-200">Betting Game</p>
+          <p className="text-blue-200 text-lg">Betting Game</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
