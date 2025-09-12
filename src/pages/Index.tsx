@@ -29,23 +29,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex flex-col">
+      {/* Top bar with How to play */}
+      <div className="w-full flex justify-end items-start p-4">
+        <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-1">
+          <Button 
+            onClick={() => setHowToOpen(true)} 
+            variant="ghost"
+            className="text-gray-800 font-semibold bg-transparent border-none shadow-none hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-200 focus:text-gray-900"
+          >
+            How to play
+          </Button>
+        </div>
+        <GameHowToPlayModal open={howToOpen} onOpenChange={setHowToOpen} />
+      </div>
+
       {gameState.gamePhase === 'lobby' ? (
-        <>
-          {/* Top bar with How to play */}
-          <div className="w-full flex justify-end items-start p-4">
-            <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-1">
-              <Button 
-                onClick={() => setHowToOpen(true)} 
-                variant="ghost"
-                className="text-gray-800 font-semibold bg-transparent border-none shadow-none hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-200 focus:text-gray-900"
-              >
-                How to play
-              </Button>
-            </div>
-            <GameHowToPlayModal open={howToOpen} onOpenChange={setHowToOpen} />
-          </div>
-          <GameLobby onGameStart={updateGameState} />
-        </>
+        <GameLobby onGameStart={updateGameState} />
       ) : (
         <GameBoard
           gameState={gameState}
