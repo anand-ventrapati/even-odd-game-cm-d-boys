@@ -19,4 +19,6 @@ export interface GameState {
   currentBet: Bet | null;
   gameLog: string[];
   winner: Player | null;
+  // Transient queue of toast events targeted at specific players
+  toastEvents?: { id: string; targetPlayerId: string; message: string }[];
 }

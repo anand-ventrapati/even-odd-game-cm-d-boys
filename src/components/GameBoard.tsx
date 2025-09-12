@@ -60,6 +60,19 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
           if (data.gameState && JSON.stringify(data.gameState) !== JSON.stringify(gameState)) {
             onUpdateGame(data.gameState as Partial<GameState>);
           }
+          // Handle toast events targeted to this player
+          const events = (data.gameState?.toastEvents || []) as { id: string; targetPlayerId: string; message: string }[];
+          if (events.length && localPlayerId) {
+            const myEvents = events.filter(e => e.targetPlayerId === localPlayerId);
+            if (myEvents.length) {
+              myEvents.forEach(e => {
+                toast({ title: "Round Result", description: e.message, duration: 3000 });
+              });
+              const remaining = events.filter(e => e.targetPlayerId !== localPlayerId);
+              // remove delivered events from shared state
+              onUpdateGame({ toastEvents: remaining });
+            }
+          }
         }
       }, 2000);
     }
@@ -137,33 +150,27 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
     const numberType = isEven ? 'even' : 'odd';
     const afterPoints = `Points: ${newPlayers[0].name}: ${newPlayers[0].points}, ${newPlayers[1].name}: ${newPlayers[1].points}`;
 
-    // Show toast notification with result
+    // Toast notifications for both players
     const guesserName = gameState.players[guesserIdx].name;
-    const bettorName = gameState.players[bettorIdx].name;
-    const currentPlayerName = gameState.players[myIndex].name;
     const isCurrentPlayerGuesser = guesserIdx === myIndex;
-    
-    let toastMessage = '';
-    if (isCurrentPlayerGuesser) {
-      if (isCorrect) {
-        toastMessage = `You guessed correct 🎉 Earned ${betAmountVal} points 🏆`;
-      } else {
-        toastMessage = `You guessed wrong ❌ Lost ${betAmountVal} points 😢`;
-      }
-    } else {
-      const opponentName = isCurrentPlayerGuesser ? bettorName : guesserName;
-      if (isCorrect) {
-        toastMessage = `${guesserName} guessed correct 🎯 You lost ${betAmountVal} points 😢`;
-      } else {
-        toastMessage = `${guesserName} guessed wrong ❌ You earned ${betAmountVal} points from them 🏆`;
-      }
-    }
+    const currentPlayerToast = isCorrect
+      ? `You guessed correct 🎉 Earned ${betAmountVal} points 🏆`
+      : `You guessed wrong ❌ Lost ${betAmountVal} points 😢`;
+    const opponentToast = isCorrect
+      ? `${guesserName} guessed correct 🎯 You lost ${betAmountVal} points 😢`
+      : `${guesserName} guessed wrong ❌ You earned ${betAmountVal} points from them 🏆`;
 
-    toast({
-      title: "Round Result",
-      description: toastMessage,
-      duration: 3000,
-    });
+    // Show toast for the current client immediately
+    toast({ title: "Round Result", description: isCurrentPlayerGuesser ? currentPlayerToast : opponentToast, duration: 3000 });
+
+    // Queue toast event for the opponent via shared state so their client will render it
+    const opponentId = gameState.players[1 - myIndex].id;
+    const existingEvents = gameState.toastEvents || [];
+    const newEventId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const newToastEvents = [
+      ...existingEvents,
+      { id: newEventId, targetPlayerId: opponentId, message: isCurrentPlayerGuesser ? opponentToast : currentPlayerToast }
+    ];
 
     // Check for winner
     const winner = newPlayers.find(p => p.points <= 0 || p.points >= 20)
@@ -180,7 +187,8 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
         `${gameState.players[guesserIdx].name} guessed ${guessValue} - ${resultText}! (${gameState.currentBet.number} is ${numberType})`,
         afterPoints
       ],
-      winner: winner || null
+      winner: winner || null,
+      toastEvents: newToastEvents
     });
     setBetAmount(1); // reset for next round
     setBetNumber(0);

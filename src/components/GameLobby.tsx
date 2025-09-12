@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dice1, Users } from 'lucide-react';
 import { GameState } from '@/types/game';
 import InviteLink from './InviteLink';
+import About from './About';
 import { supabase } from '@/integrations/supabase/client';
 
 interface GameLobbyProps {
@@ -171,7 +172,7 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
     : '';
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl space-y-8">
         <div className="text-center">
           <div className="flex items-center justify-center mb-4">
@@ -278,6 +279,10 @@ const GameLobby = ({ onGameStart }: GameLobbyProps) => {
             <Users className="h-4 w-4 mr-1" />
             2 players required to start — play with a friend on separate devices!
           </div>
+          <div className="mt-12 text-white/60 text-sm">
+            Concept by Sohail, with support from Rishi; Developed by Anand, with assistance from Sanjay.
+          </div>
+          <About />
         </div>
       </div>
     </div>
