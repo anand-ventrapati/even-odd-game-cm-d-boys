@@ -15,7 +15,7 @@ const About = () => {
             variant="ghost"
             className="text-gray-800 font-semibold bg-transparent border-none shadow-none hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-200 focus:text-gray-900 flex items-center gap-2"
           >
-            About
+            👉 Click here to know The Story Behind the Game
             {isOpen ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
@@ -68,16 +68,6 @@ const About = () => {
 
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white font-semibold">
-                    With advice from <span className="text-blue-400">Rishi</span>{' '}
-                    <span className="text-yellow-300">💡</span>
-                  </p>
-                  <div className="mt-2 text-sm text-white/80">
-                    <p>📌 Pin: <code className="bg-black/30 px-2 py-1 rounded text-yellow-300">24093-CM-244</code></p>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                  <p className="text-white font-semibold">
                     Developed by <span className="text-green-400">Anand</span>{' '}
                     <span className="text-blue-300">👨‍💻</span>
                   </p>
@@ -109,39 +99,6 @@ const About = () => {
                     </p>
                   </div>
                 </div>
-
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                  <p className="text-white font-semibold">
-                    Assisted by <span className="text-purple-400">Sanjay</span>{' '}
-                    <span className="text-orange-300">🛠️</span>
-                  </p>
-                  <div className="mt-2 space-y-1 text-sm text-white/80">
-                    <p className="flex items-center gap-2">
-                      📸 Instagram:{' '}
-                      <a
-                        href="https://instagram.com/mr_dodge_max"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-                      >
-                        @mr_dodge_max
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      🔗 LinkedIn:{' '}
-                      <a
-                        href="https://linkedin.com/in/sanjay-tammu"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-                      >
-                        Sanjay Tammu
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </p>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -157,33 +114,52 @@ const About = () => {
               <div className="space-y-3">
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white text-sm">
-                    💻 The whole website was <span className="font-bold text-yellow-400">developed with AI</span>.
+                    💻 The entire game-website was crafted with AI power – built from scratch at zero cost.
                   </p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white text-sm">
-                    🚀 <span className="font-bold text-pink-400">Lovable</span> was used for the frontend.
+                    🎨 <span className="font-bold text-pink-400">Frontend (UI/UX):</span> We jumpstarted the design using Lovable, giving us a sleek and modern UI. Then we customized it — removed the Lovable badge manually, refined layouts, and added our own creative touch.
                   </p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white text-sm">
-                    🗄️ <span className="font-bold text-green-400">Supabase</span> was used for the backend.
+                    🗄️ <span className="font-bold text-green-400">Backend & Multiplayer Magic:</span> With Supabase, we enabled two mobiles to connect in real-time. Every guess and message instantly syncs between players, making the game feel alive and interactive.
                   </p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white text-sm">
-                    🔗 Project connected to <span className="font-bold text-gray-300">GitHub</span> and opened in{' '}
-                    <span className="font-bold text-blue-300">Cursor</span> for editing.
+                    🔗 <span className="font-bold text-gray-300">Version Control & Collaboration:</span> The whole codebase lives on GitHub, where we tracked changes, synced updates, and collaborated seamlessly.
                   </p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white text-sm">
-                    🌍 Hosted on <span className="font-bold text-black bg-white px-2 py-1 rounded">Vercel</span>.
+                    ⌨️ <span className="font-bold text-blue-400">AI Co-pilots:</span> For complex logic — like handling turns, sharing messages between players, and syncing game state — we leaned on ChatGPT + Claude as coding copilots.
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-white text-sm">
+                    🖼️ <span className="font-bold text-purple-400">Personal Branding:</span> We swapped out the Lovable default favicon ❤️ with our own custom logo, giving the game a professional identity.
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-white text-sm">
+                    🛠️ <span className="font-bold text-orange-400">Editing Environment:</span> Using Cursor + Command Prompt, we tested, refined, and ran the project locally until it was perfect.
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-white text-sm">
+                    🌍 <span className="font-bold text-cyan-400">Deployment:</span> With a single push to GitHub, Vercel hosted our project instantly. From localhost to a shareable web link in minutes!
+                  </p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                  <p className="text-white text-sm">
+                    🎮 <span className="font-bold text-yellow-400">End Result:</span> A fully functional multiplayer game with real-time interaction, customized branding, clean UI, and zero hosting costs.
                   </p>
                 </div>
                 <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                   <p className="text-white text-sm font-semibold text-center">
-                    🎮 This is the story of how our game came alive!
+                    ✨ Proof that with AI + free tools + creativity, you don't just build projects — you bring them to life!
                   </p>
                 </div>
               </div>
