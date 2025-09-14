@@ -77,7 +77,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
   }, [gameState]); // save whenever gameState changes
 
   // --- PHASE: BETTING ---
-  const placeBet = () => {
+  const placeBet = async () => {
     setBetError(null);
     if (betAmount < 1 || betAmount > maxAllowedBet) {
       setBetError(
@@ -85,7 +85,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
       );
       return;
     }
-    onUpdateGame({
+    const newState = {
       currentBet: {
         playerId: currentPlayer.id,
         number: betNumber,
@@ -96,11 +96,22 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
         ...gameState.gameLog,
         `${currentPlayer.name} placed a bet.`,
       ]
-    });
+    };
+    onUpdateGame(newState);
+
+    // FIX: Manually update Supabase to force a real-time sync for the other player.
+    const { error } = await supabase
+        .from('games')
+        .update({ gameState: newState as any })
+        .eq('pin', gameState.gameId);
+    
+    if (error) {
+        console.error("Failed to update game state:", error.message);
+    }
   };
 
   // --- PHASE: GUESSING ---
-  const makeGuess = (guessValue: 'even' | 'odd') => {
+  const makeGuess = async (guessValue: 'even' | 'odd') => {
     if (!gameState.currentBet) return;
 
     const isEven = gameState.currentBet.number % 2 === 0;
@@ -153,7 +164,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
       ? newPlayers.find(p => p.points >= 20) || newPlayers.find(p => p.points > 0)
       : null;
 
-    onUpdateGame({
+    const newState = {
       players: newPlayers,
       currentTurn: winner ? gameState.currentTurn : guesserIdx, // always guesser becomes next bettor if not game end
       gamePhase: winner ? 'ended' : 'betting',
@@ -165,7 +176,20 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
       ],
       winner: winner || null,
       toastEvents: newToastEvents
-    });
+    };
+
+    onUpdateGame(newState);
+
+    // FIX: Manually update Supabase to force a real-time sync for the other player.
+    const { error } = await supabase
+      .from('games')
+      .update({ gameState: newState as any })
+      .eq('pin', gameState.gameId);
+    
+    if (error) {
+        console.error("Failed to update game state:", error.message);
+    }
+    
     setBetAmount(1); // reset for next round
     setBetNumber(0);
   };
