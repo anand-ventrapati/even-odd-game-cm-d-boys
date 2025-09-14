@@ -37,52 +37,28 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
   const maxAllowedBet = Math.min(currentPlayer.points, otherPlayer.points);
 
   // --- MULTIPLAYER POLLING LOGIC ---
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
-
+  // --- REAL-TIME SUBSCRIPTION LOGIC ---
   useEffect(() => {
-    // Start polling when both players present and NOT in lobby
-    if (
-      gameState.gameId &&
-      gameState.players.length === 2 &&
-      gameState.gamePhase !== 'lobby'
-    ) {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-
-      pollingRef.current = setInterval(async () => {
-        const { data, error } = await supabase
-          .from('games')
-          .select('*')
-          .eq('pin', gameState.gameId)
-          .maybeSingle();
-
-        if (!error && data) {
-          // Only update if gameState is present in db
-          if (data.gameState && JSON.stringify(data.gameState) !== JSON.stringify(gameState)) {
-            onUpdateGame(data.gameState as Partial<GameState>);
-          }
-          // Handle toast events targeted to this player
-          const events = (data.gameState?.toastEvents || []) as { id: string; targetPlayerId: string; message: string }[];
-          if (events.length && localPlayerId) {
-            const myEvents = events.filter(e => e.targetPlayerId === localPlayerId);
-            if (myEvents.length) {
-              myEvents.forEach(e => {
-                toast({ title: "Round Result", description: e.message, duration: 3000 });
-              });
-              const remaining = events.filter(e => e.targetPlayerId !== localPlayerId);
-              // remove delivered events from shared state
-              onUpdateGame({ toastEvents: remaining });
+    if (gameState.gameId && gameState.players.length === 2) {
+      const channel = supabase
+        .channel(`game_updates_${gameState.gameId}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'games', filter: `pin=eq.${gameState.gameId}` },
+          (payload) => {
+            console.log('Real-time update received:', payload);
+            if (payload.new && JSON.stringify(payload.new.gameState) !== JSON.stringify(gameState)) {
+              onUpdateGame(payload.new.gameState as Partial<GameState>);
             }
           }
-        }
-      }, 2000);
+        )
+        .subscribe();
+        
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
-
-    return () => {
-      // Clear polling interval when unmounting or returning to lobby
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [gameState.gameId, gameState.players.length, gameState.gamePhase]);
-
+  }, [gameState.gameId, gameState.players.length]);
   // --- GAME STATE UPDATE TO DB when local changes ---
   useEffect(() => {
     // Only update db if in game (not lobby)
