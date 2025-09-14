@@ -18,7 +18,7 @@ export default function GameHowToPlayModal({ open, onOpenChange }: { open: boole
           <ol className="list-decimal list-inside space-y-3 p-4">
             <li>Both players join a game using the Game PIN and select their player view.</li>
             <li>Each player starts with <span className="font-bold text-blue-600">10 points.</span></li>
-            <li>The first player (current turn) secretly chooses a number between 0-9 and places a bet (amount of points).</li>
+            <li>The first player (current turn) secretly chooses a number between 1-9 and places a bet (amount of points).</li>
             <li>The bet amount cannot be higher than either player's current points.</li>
             <li>
               The other player tries to guess if the chosen number is{" "}
