@@ -227,7 +227,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
             <CardTitle className="text-2xl text-white">Game Over!</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-xl text-green-400 font-bold">
+           <p className={`text-xl font-bold ${gameState.winner?.id === localPlayerId ? 'text-green-400' : 'text-red-400'}`}>
   {gameState.winner?.id === localPlayerId ? 'You Win!' : 'You Lost!'}
 </p>
             <div className="space-y-2">
