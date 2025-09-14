@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Trophy, RotateCcw, Info } from 'lucide-react';
+import { Coins, Trophy, RotateCcw } from 'lucide-react';
 import { GameState, Bet } from '@/types/game';
 import GameHowToPlayModal from './GameHowToPlayModal';
 import { toast } from '@/hooks/use-toast';
@@ -36,7 +36,6 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
   // Allow betting only up to BOTH players' points
   const maxAllowedBet = Math.min(currentPlayer.points, otherPlayer.points);
 
-  // --- MULTIPLAYER POLLING LOGIC ---
   // --- REAL-TIME SUBSCRIPTION LOGIC ---
   useEffect(() => {
     if (gameState.gameId && gameState.players.length === 2) {
@@ -47,7 +46,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
           { event: '*', schema: 'public', table: 'games', filter: `pin=eq.${gameState.gameId}` },
           (payload) => {
             console.log('Real-time update received:', payload);
-            if (payload.new && JSON.stringify(payload.new.gameState) !== JSON.stringify(gameState)) {
+            if (payload.new && payload.new.gameState) {
               onUpdateGame(payload.new.gameState as Partial<GameState>);
             }
           }
@@ -59,6 +58,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
       };
     }
   }, [gameState.gameId, gameState.players.length]);
+
   // --- GAME STATE UPDATE TO DB when local changes ---
   useEffect(() => {
     // Only update db if in game (not lobby)
@@ -203,9 +203,9 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
             <CardTitle className="text-2xl text-white">Game Over!</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-           <p className={`text-xl font-bold ${gameState.winner?.id === localPlayerId ? 'text-green-400' : 'text-red-400'}`}>
-  {gameState.winner?.id === localPlayerId ? 'You Win!' : 'You Lost!'}
-</p>
+            <p className={`text-xl font-bold ${gameState.winner?.id === localPlayerId ? 'text-green-400' : 'text-red-400'}`}>
+              {gameState.winner?.id === localPlayerId ? 'You Win!' : 'You Lost!'}
+            </p>
             <div className="space-y-2">
               <Button onClick={restartGame} className="w-full bg-green-600 hover:bg-green-700">
                 <RotateCcw className="h-4 w-4 mr-2" />
