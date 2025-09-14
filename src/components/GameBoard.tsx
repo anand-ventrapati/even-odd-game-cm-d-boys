@@ -277,7 +277,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
               isMyTurn ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-white mb-2">Choose Number (0-9)</label>
+                    <label className="block text-white mb-2">Choose Number (1-9)</label>
                     <div className="grid grid-cols-5 gap-2">
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                         <Button
