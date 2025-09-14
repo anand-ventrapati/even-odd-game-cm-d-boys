@@ -228,8 +228,8 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-xl text-green-400 font-bold">
-              {gameState.winner?.name} Wins!
-            </p>
+  {gameState.winner?.id === localPlayerId ? 'You Win!' : 'You Lost!'}
+</p>
             <div className="space-y-2">
               <Button onClick={restartGame} className="w-full bg-green-600 hover:bg-green-700">
                 <RotateCcw className="h-4 w-4 mr-2" />
