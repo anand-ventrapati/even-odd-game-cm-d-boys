@@ -356,7 +356,7 @@ const GameBoard = ({ gameState, onUpdateGame, localPlayerId }: GameBoardProps) =
               ) : (
                 <div className="text-center text-white text-lg py-8">
                   Waiting for {otherPlayer.name} to guess...
-                </div>
+                </p>
               )
             )}
           </CardContent>
