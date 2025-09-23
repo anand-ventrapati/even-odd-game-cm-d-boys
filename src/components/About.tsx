@@ -100,62 +100,7 @@ const About = () => {
                   </div>
                 </div>
 
-                <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-                  <p className="text-white font-semibold">
-                    Supported by <span className="text-purple-400">Sanjay</span> and <span className="text-orange-400">Rishi</span>{' '}
-                    <span className="text-pink-300">💡</span>
-                  </p>
-                  <div className="mt-2 space-y-2 text-sm text-white/80">
-                    <div className="space-y-1">
-                      <p className="text-white font-medium">Sanjay:</p>
-                      <p>📌 Pin: <code className="bg-black/30 px-2 py-1 rounded text-yellow-300">24093-CM-216</code></p>
-                      <p className="flex items-center gap-2">
-                        📸 Instagram:{' '}
-                        <a
-                          href="https://instagram.com/mr_dodge_max"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-                        >
-                          Sanjay
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </p>
-                      <p className="flex items-center gap-2">
-                        🔗 LinkedIn:{' '}
-                        <a
-                          href="https://www.linkedin.com/in/sanjay-tammu-4b887337a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-                        >
-                          Sanjay Tammu
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-white font-medium">Rishi:</p>
-                      <p>📌 Pin: <code className="bg-black/30 px-2 py-1 rounded text-yellow-300">24093-CM-244</code></p>
-                      <p className="flex items-center gap-2">
-                        📸 Instagram:{' '}
-                        <a
-                          href="https://instagram.com/rishi_naga_ganesh123"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
-                        >
-                          @rishi_naga_ganesh123
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
+                
           {/* About How We Built the Project */}
           <Card className="bg-white/10 backdrop-blur-sm border-white/20 shadow-lg">
             <CardHeader className="pb-3">
